@@ -28,6 +28,8 @@ import emissary.config.ConfigUtil;
 import emissary.config.Configurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.dropwizard.DropwizardExports;
 
 /**
  * Manages the interactions with CodaHale's Metrics package, including configuration
@@ -37,14 +39,14 @@ public class MetricsManager {
     public static final String DEFAULT_NAMESPACE_NAME = "MetricsManager";
 
     @SuppressWarnings("rawtypes")
-    public static final SortedMap<String, Gauge> EMPTY_GUAGES = new TreeMap<String, Gauge>();
-    public static final SortedMap<String, Counter> EMPTY_COUNTERS = new TreeMap<String, Counter>();
-    public static final SortedMap<String, Histogram> EMPTY_HISTOGRAMS = new TreeMap<String, Histogram>();
-    public static final SortedMap<String, Meter> EMPTY_METERS = new TreeMap<String, Meter>();
+    protected static final SortedMap<String, Gauge> EMPTY_GUAGES = new TreeMap<>();
+    protected static final SortedMap<String, Counter> EMPTY_COUNTERS = new TreeMap<>();
+    protected static final SortedMap<String, Histogram> EMPTY_HISTOGRAMS = new TreeMap<>();
+    protected static final SortedMap<String, Meter> EMPTY_METERS = new TreeMap<>();
 
     protected static final Logger logger = LoggerFactory.getLogger(MetricsManager.class);
 
-    protected final MetricRegistry metrics = new MetricRegistry();
+    protected static final MetricRegistry metrics = new MetricRegistry();
     protected final HealthCheckRegistry healthChecks = new HealthCheckRegistry();
 
     protected final Slf4jReporter reporter;
@@ -60,7 +62,7 @@ public class MetricsManager {
     public MetricsManager() {
         configure();
         init();
-        this.reporter = Slf4jReporter.forRegistry(this.metrics).build();
+        this.reporter = Slf4jReporter.forRegistry(metrics).build();
     }
 
     /**
@@ -71,7 +73,7 @@ public class MetricsManager {
     public MetricsManager(final Configurator conf) {
         this.conf = conf;
         init();
-        this.reporter = Slf4jReporter.forRegistry(this.metrics).build();
+        this.reporter = Slf4jReporter.forRegistry(metrics).build();
     }
 
     public void logMetrics(final Map<String, Timer> stats) {
@@ -80,8 +82,8 @@ public class MetricsManager {
         this.reporter.report(EMPTY_GUAGES, EMPTY_COUNTERS, EMPTY_HISTOGRAMS, EMPTY_METERS, m);
     }
 
-    public MetricRegistry getMetricRegistry() {
-        return this.metrics;
+    public static MetricRegistry getMetricRegistry() {
+        return metrics;
     }
 
     public HealthCheckRegistry getHealthCheckRegistry() {
@@ -117,15 +119,16 @@ public class MetricsManager {
                         "MAX_AGGREGATE_FIZE_SIZE_BEFORE_UNHEALTHY_BYTES", Long.MAX_VALUE)));
         this.healthChecks.register("healthcheck.threaddeadlocks", new ThreadDeadlockHealthCheck());
         this.healthChecks.register("healthcheck.agentpool", new AgentPoolHealthCheck());
+        this.healthChecks.register("healthcheck.jvm", new JVMHealthCheck(100.0, 100.0)); // TODO: Update these values from a config file
     }
 
     protected void initMetrics() {
         if (this.conf.findBooleanEntry("JVM_METRICS_ENABLED", false)) {
             logger.debug("JVM Metrics are enabled");
-            this.metrics.registerAll(new MemoryUsageGaugeSet());
-            this.metrics.registerAll(new GarbageCollectorMetricSet());
-            this.metrics.registerAll(new ThreadStatesGaugeSet());
-            this.metrics.register("file.descriptor.info", new FileDescriptorRatioGauge());
+            metrics.registerAll(new MemoryUsageGaugeSet());
+            metrics.registerAll(new GarbageCollectorMetricSet());
+            metrics.registerAll(new ThreadStatesGaugeSet());
+            metrics.register("file.descriptor.info", new FileDescriptorRatioGauge());
         } else {
             logger.debug("JVM Metrics are disabled");
         }
@@ -145,7 +148,7 @@ public class MetricsManager {
 
 
         final JmxReporter jmxReporter =
-                JmxReporter.forRegistry(this.metrics).inDomain(domain).convertRatesTo(rateUnit).convertDurationsTo(durationUnit).build();
+                JmxReporter.forRegistry(metrics).inDomain(domain).convertRatesTo(rateUnit).convertDurationsTo(durationUnit).build();
 
         jmxReporter.start();
     }
@@ -166,7 +169,7 @@ public class MetricsManager {
         final TimeUnit durationUnit = TimeUnit.valueOf(this.conf.findStringEntry("SLF4J_METRICS_DURATION_UNIT", TimeUnit.MILLISECONDS.name()));
 
         final Slf4jReporter slf4jReporter =
-                Slf4jReporter.forRegistry(this.metrics).outputTo(LoggerFactory.getLogger(loggerStr)).convertRatesTo(rateUnit)
+                Slf4jReporter.forRegistry(metrics).outputTo(LoggerFactory.getLogger(loggerStr)).convertRatesTo(rateUnit)
                         .convertDurationsTo(durationUnit).build();
 
         if (interval > 0) {
@@ -193,7 +196,7 @@ public class MetricsManager {
 
         final Graphite graphite = new Graphite(new InetSocketAddress(host, port));
         final GraphiteReporter graphiteReporter =
-                GraphiteReporter.forRegistry(this.metrics).prefixedWith(prefix).convertRatesTo(rateUnit).convertDurationsTo(durationUnit)
+                GraphiteReporter.forRegistry(metrics).prefixedWith(prefix).convertRatesTo(rateUnit).convertDurationsTo(durationUnit)
                         .filter(MetricFilter.ALL).build(graphite);
 
         if (interval > 0) {
