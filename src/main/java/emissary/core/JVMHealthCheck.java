@@ -2,12 +2,7 @@ package emissary.core;
 
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.RatioGauge;
 import com.codahale.metrics.health.HealthCheck;
-import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
-import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
-
-import java.util.SortedMap;
 
 // Health Check that returns healthy if JVM heap and garbage collect are at acceptable values.
 public class JVMHealthCheck extends HealthCheck {
@@ -17,7 +12,7 @@ public class JVMHealthCheck extends HealthCheck {
 
     MetricRegistry metricsManager = MetricsManager.getMetricRegistry();
 
-    public JVMHealthCheck(final double maxHeapUsage, final double maxNonHeapUsage){
+    public JVMHealthCheck(final double maxHeapUsage, final double maxNonHeapUsage) {
         this.maxHeapUsage = maxHeapUsage;
         this.maxNonHeapUsage = maxNonHeapUsage;
     }

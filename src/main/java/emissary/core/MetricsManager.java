@@ -28,8 +28,6 @@ import emissary.config.ConfigUtil;
 import emissary.config.Configurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.dropwizard.DropwizardExports;
 
 /**
  * Manages the interactions with CodaHale's Metrics package, including configuration
