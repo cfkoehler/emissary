@@ -14,7 +14,7 @@
     </rollingPolicy>
   </appender>
   -->
-  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+  <appender name="STDOUT" class="ch.qos.logback.core. ">
     <encoder>
       <pattern>%d ${emissary.node.name}-${emissary.node.port} %5p %c - %X{shortName} %X{serviceLocation} - %m%n</pattern>
     </encoder>
