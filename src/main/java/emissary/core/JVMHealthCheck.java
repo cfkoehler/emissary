@@ -32,9 +32,9 @@ public class JVMHealthCheck extends HealthCheck {
         boolean healthy = true;
 
         // Validate if it is healthy
-        // if ((Double) heapUsage.getValue() > maxHeapUsage || ((Double) nonHeapUsage.getValue() > maxHeapUsage)) {
-        // healthy = false;
-        // }
+        if ((Double) heapUsage.getValue() > maxHeapUsage || ((Double) nonHeapUsage.getValue() > maxHeapUsage)) {
+            healthy = false;
+        }
 
         Map<String, Metric> memoryMap = metricsManager.getMetrics();
         for (String key : memoryMap.keySet()) {

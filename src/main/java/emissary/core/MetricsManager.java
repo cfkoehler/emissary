@@ -7,6 +7,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
+import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
@@ -121,15 +122,20 @@ public class MetricsManager {
     }
 
     protected void initMetrics() {
-        if (this.conf.findBooleanEntry("JVM_METRICS_ENABLED", false)) {
-            logger.debug("JVM Metrics are enabled");
-            metrics.registerAll(new MemoryUsageGaugeSet());
-            metrics.registerAll(new GarbageCollectorMetricSet());
-            metrics.registerAll(new ThreadStatesGaugeSet());
-            metrics.register("file.descriptor.info", new FileDescriptorRatioGauge());
-        } else {
+        if (!this.conf.findBooleanEntry("JVM_METRICS_ENABLED", false)) {
             logger.debug("JVM Metrics are disabled");
+            return;
         }
+
+        logger.debug("JVM Metrics are enabled");
+        metrics.registerAll(new MemoryUsageGaugeSet());
+        metrics.registerAll(new GarbageCollectorMetricSet());
+        metrics.registerAll(new ThreadStatesGaugeSet());
+        metrics.register("file.descriptor.info", new FileDescriptorRatioGauge());
+
+        ConsoleReporter reporter = ConsoleReporter.forRegistry(metrics).build();
+        reporter.start(20, TimeUnit.SECONDS);
+        reporter.report(); //TODO Validate this!
     }
 
     protected void initJmxReporter() {

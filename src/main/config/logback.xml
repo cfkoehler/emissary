@@ -3,7 +3,6 @@
   <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
     <resetJUL>true</resetJUL>
   </contextListener>
-  <!--
   <appender name="TOFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <encoder>
       <pattern>%d ${emissary.node.name}-${emissary.node.port} %5p %c - %X{shortName} %X{serviceLocation} - %m%n</pattern>
@@ -13,7 +12,6 @@
       <fileNamePattern>logs/${emissary.node.name}-${emissary.node.port}.log.%d{yyyy-MM-dd-HH}</fileNamePattern>
     </rollingPolicy>
   </appender>
-  -->
   <appender name="STDOUT" class="ch.qos.logback.core. ">
     <encoder>
       <pattern>%d ${emissary.node.name}-${emissary.node.port} %5p %c - %X{shortName} %X{serviceLocation} - %m%n</pattern>
