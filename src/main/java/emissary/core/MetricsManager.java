@@ -135,7 +135,7 @@ public class MetricsManager {
 
         ConsoleReporter reporter = ConsoleReporter.forRegistry(metrics).build();
         reporter.start(20, TimeUnit.SECONDS);
-        reporter.report(); //TODO Validate this!
+        reporter.report(); // TODO Validate this! //TODO: decide what values are worth having in the report?
     }
 
     protected void initJmxReporter() {
