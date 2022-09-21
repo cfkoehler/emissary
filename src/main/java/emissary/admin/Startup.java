@@ -425,24 +425,8 @@ public class Startup {
                 numPlacesFoundPreviously = numPlacesFound;
 
                 final float percentageUp = (float) numPlacesFound / (float) numPlacesExpected;
-                final String leadString;
-                if (percentageUp < 0.20) {
-                    leadString = "Hmmm... only ";
-                } else if (percentageUp < 0.40) {
-                    leadString = "Ok, now ";
-                } else if (percentageUp < 0.60) {
-                    leadString = "Making progress, ";
-                } else if (percentageUp < 0.80) {
-                    leadString = "Over half way there! ";
-                } else if (percentageUp < 0.95) {
-                    leadString = "Almost ready! ";
-                } else if (numPlacesFound + 1 == numPlacesExpected) {
-                    leadString = "One more to go... ";
-                } else {
-                    leadString = "Yeah! ";
-                }
 
-                logger.info("{}{} of {} places are up and running.", leadString, numPlacesFound, numPlacesExpected);
+                logger.info("{}% of {} places are up and running.", percentageUp, numPlacesExpected);
             }
 
         } while (true); // break terminated loop
