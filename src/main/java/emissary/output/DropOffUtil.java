@@ -2,6 +2,7 @@ package emissary.output;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
@@ -57,7 +58,7 @@ public class DropOffUtil {
     protected Executrix executrix;
 
     // Items for generating random filenames
-    protected static Random prng = new Random();
+    protected static SecureRandom prng = new SecureRandom();
     protected static final SimpleDateFormat DATE_PATTERN = new SimpleDateFormat("yyyyDDDHHmmss");
     protected static final byte[] ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".getBytes();
     protected static String prefix = "TXT";
