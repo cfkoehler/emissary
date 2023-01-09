@@ -1,0 +1,5 @@
+apiVersion: v2
+name: storage
+description: A Helm chart for local storage volumes
+icon: https://miro.medium.com/max/256/1*1Cc99RF4vtCSKaHDgz_iyQ.png
+version: 1.0.0

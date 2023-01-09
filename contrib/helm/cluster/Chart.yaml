@@ -1,0 +1,5 @@
+apiVersion: v2
+name: cluster
+description: A Helm chart for Emissary Cluster Deployment
+icon: https://github.com/kubernetes/community/blob/master/icons/png/resources/labeled/deploy-128.png
+version: 1.0.0

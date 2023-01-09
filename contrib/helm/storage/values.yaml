@@ -1,0 +1,24 @@
+## This will create two PV and PVCs for local output and local logs on each node in /tmp
+
+volumes:
+  local-output:
+    name: local-output
+    storageSize: 2Gi
+    accessMode: ReadWriteMany
+    reclaimPolicy: Retain
+    localPath: /tmp/local-output-pv
+    nodes:
+      - c-w1
+      - c-w2
+      - c-w3
+  local-logs:
+    name: local-logs
+    storageSize: 2Gi
+    accessMode: ReadWriteMany
+    reclaimPolicy: Retain
+    localPath: /tmp/local-logs-pv
+    nodes:
+      - c-m
+      - c-w1
+      - c-w2
+      - c-w3

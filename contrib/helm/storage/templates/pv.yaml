@@ -1,0 +1,28 @@
+{{- range $volume := .Values.volumes }}
+{{- range $node := .nodes }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ $volume.name }}-{{ $node }}
+spec:
+  storageClassName: {{ $volume.name }}
+  capacity:
+    storage: {{ $volume.storageSize }}
+  accessModes:
+    - {{ $volume.accessMode }}
+  persistentVolumeReclaimPolicy: {{ $volume.reclaimPolicy }}
+  local:
+    path: {{ $volume.localPath }}
+  claimRef:
+    name: {{ $volume.name }}-{{ $node }}-data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - {{ $node }}
+---
+{{- end }}
+{{- end }}
