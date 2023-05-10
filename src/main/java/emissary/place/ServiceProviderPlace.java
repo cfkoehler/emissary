@@ -107,6 +107,8 @@ public abstract class ServiceProviderPlace implements emissary.place.IServicePro
      */
     protected Logger logger;
 
+    protected Logger objectTraceLogger;
+
     /**
      * Set up handler for rehashing
      */
@@ -242,6 +244,9 @@ public abstract class ServiceProviderPlace implements emissary.place.IServicePro
 
         // Customize the logger to the runtime class
         logger = LoggerFactory.getLogger(this.getClass());
+
+        // Setup objectTraceLogger
+        objectTraceLogger = LoggerFactory.getLogger("objectTrace");
 
         // The order of the following initialization calls
         // is touchy. NPE all over if you mess up here.

@@ -11,6 +11,7 @@ import emissary.place.EmptyFormPlace;
 import emissary.place.ServiceProviderPlace;
 import emissary.util.DataUtil;
 import emissary.util.DisposeHelper;
+import emissary.util.ObjectTracing;
 import emissary.util.ShortNameComparator;
 
 import org.slf4j.Logger;
@@ -244,6 +245,9 @@ public class DropOffPlace extends ServiceProviderPlace implements EmptyFormPlace
             if (outputObjectMetrics) {
                 objectMetricsLog.info(appendEntries(outputObjectMetrics(tld, objectMetricsFields)), "Finished DropOff");
             }
+
+            // If object tracing say file is complete and fully dropped off // TODO: Add config conditional for this to be enabled
+            objectTraceLogger.info(appendEntries(ObjectTracing.CreateTraceMessageMap(tld.getId(), "DropOffComplete")), "");
 
             logger.info("Finished DropOff for object {}, with external id: {}, with total processing time: {}ms, with filetype: {}",
                     tld.getInternalId(), this.dropOffUtil.getBestId(tld, tld), (new Date().getTime() - tld.getCreationTimestamp().getTime()),

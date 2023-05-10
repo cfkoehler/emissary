@@ -2,11 +2,14 @@ package emissary.id;
 
 import emissary.core.Form;
 import emissary.core.IBaseDataObject;
+import emissary.util.ObjectTracing;
 import emissary.util.UnixFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+
+import static net.logstash.logback.marker.Markers.appendEntries;
 
 /**
  * Accesses emissary.util.UnixFile to perform file identification tests using emissary.util.UnixFile
@@ -135,6 +138,9 @@ public class UnixFilePlace extends emissary.id.IdPlace {
             } else {
                 logger.debug("Unixfile result was null");
             }
+            // Example of how ObjectTrace can be added to a specific place. Maybe move up to the abstract for when a place is done.
+            // Then a place can be configured to enable objectTracing and all places are default for false
+            objectTraceLogger.info(appendEntries(ObjectTracing.CreateTraceMessageMap(d.getId(), "CompletedUnixFilePlace")), "");
         } catch (Exception e) {
             logger.error("Could not run unixfile", e);
             d.addProcessingError(e.getMessage());
