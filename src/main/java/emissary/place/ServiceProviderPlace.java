@@ -321,8 +321,8 @@ public abstract class ServiceProviderPlace implements emissary.place.IServicePro
             dirPlace = theDir;
             localDirPlace = null;
             try {
-                String myUrl = KeyManipulator.getServiceHostURL(keys.get(0));
-                String dirUrl = KeyManipulator.getServiceHostURL(dirPlace);
+                String myUrl = KeyManipulator.getServiceHostUrl(keys.get(0));
+                String dirUrl = KeyManipulator.getServiceHostUrl(dirPlace);
                 if (StringUtils.equals(dirUrl, myUrl)) {
                     localDirPlace = (IDirectoryPlace) Namespace.lookup(KeyManipulator.getServiceLocation(theDir));
                 } else {

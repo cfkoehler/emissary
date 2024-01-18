@@ -317,7 +317,7 @@ public class DirectoryEntry implements Serializable {
         this.dataType = KeyManipulator.getDataType(key);
         this.dataID = this.dataType + KeyManipulator.DATAIDSEPARATOR + this.serviceType;
         this.serviceLocation = KeyManipulator.getServiceLocation(key);
-        this.serviceHostURL = KeyManipulator.getServiceHostURL(key);
+        this.serviceHostURL = KeyManipulator.getServiceHostUrl(key);
         final int exp = KeyManipulator.getExpense(key, -1);
         if (exp > -1) {
             setCQEFromExp(exp);

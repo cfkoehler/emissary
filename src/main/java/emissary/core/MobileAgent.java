@@ -806,7 +806,7 @@ public abstract class MobileAgent implements IMobileAgent, MobileAgentMBean {
 
                 // Subtract one remote overhead if this represents a move
                 int exp = lpv.getExpense();
-                if (!KeyManipulator.getServiceHostURL(cf).equals(lpv.getServiceHostURL()) && exp > DirectoryPlace.REMOTE_EXPENSE_OVERHEAD) {
+                if (!KeyManipulator.getServiceHostUrl(cf).equals(lpv.getServiceHostURL()) && exp > DirectoryPlace.REMOTE_EXPENSE_OVERHEAD) {
                     exp -= DirectoryPlace.REMOTE_EXPENSE_OVERHEAD;
                 }
 
