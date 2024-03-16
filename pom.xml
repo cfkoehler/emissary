@@ -72,6 +72,7 @@
     <dep.maven-surefire-plugin.version>3.1.0</dep.maven-surefire-plugin.version>
     <dep.mockito.version>5.5.0</dep.mockito.version>
     <dep.picocli.version>4.7.4</dep.picocli.version>
+    <dep.promethus.metrics.version>0.16.0</dep.promethus.metrics.version>
     <dep.slf4j.version>2.0.7</dep.slf4j.version>
     <dep.spullara.mustache.compiler.version>0.9.10</dep.spullara.mustache.compiler.version>
     <dep.spymemcached.version>2.12.3</dep.spymemcached.version>
@@ -135,6 +136,26 @@
         <groupId>info.picocli</groupId>
         <artifactId>picocli</artifactId>
         <version>${dep.picocli.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.prometheus</groupId>
+        <artifactId>simpleclient</artifactId>
+        <version>${dep.promethus.metrics.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.prometheus</groupId>
+        <artifactId>simpleclient_dropwizard</artifactId>
+        <version>${dep.promethus.metrics.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.prometheus</groupId>
+        <artifactId>simpleclient_hotspot</artifactId>
+        <version>${dep.promethus.metrics.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.prometheus</groupId>
+        <artifactId>simpleclient_servlet</artifactId>
+        <version>${dep.promethus.metrics.version}</version>
       </dependency>
       <dependency>
         <groupId>jakarta.xml.bind</groupId>
@@ -332,6 +353,22 @@
     <dependency>
       <groupId>io.dropwizard.metrics</groupId>
       <artifactId>metrics-servlets</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>simpleclient</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>simpleclient_dropwizard</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>simpleclient_hotspot</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>simpleclient_servlet</artifactId>
     </dependency>
     <dependency>
       <groupId>jakarta.xml.bind</groupId>

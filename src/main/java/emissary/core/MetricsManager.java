@@ -20,6 +20,14 @@ import com.codahale.metrics.jvm.FileDescriptorRatioGauge;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.codahale.metrics.jvm.ThreadStatesGaugeSet;
+import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.dropwizard.DropwizardExports;
+import io.prometheus.client.exporter.MetricsServlet;
+import io.prometheus.client.hotspot.DefaultExports;
+import jakarta.servlet.Servlet;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,6 +117,11 @@ public class MetricsManager {
         initJmxReporter();
         initGraphiteReporter();
         initSlf4jReporter();
+        try {
+            initPrometheusReporter();
+        } catch (Exception e) {
+            logger.error("Error initializing prometheus reporter", e);
+        }
     }
 
     protected void initHealthChecks() {
@@ -200,6 +213,29 @@ public class MetricsManager {
         if (interval > 0) {
             graphiteReporter.start(interval, intervalUnit);
         }
+    }
+
+    protected void initPrometheusReporter() throws Exception {
+        if (!this.conf.findBooleanEntry("PROMETHEUS_METRICS_ENABLED", false)) {
+            logger.debug("Prometheus Metrics are disabled");
+            return;
+        }
+        logger.debug("Prometheus Metrics are enabled");
+
+        CollectorRegistry.defaultRegistry.register(new DropwizardExports(metrics));
+
+        // Expose Prometheus metrics.
+        Server server = new Server(1234);
+        ServletContextHandler context = new ServletContextHandler();
+        context.setContextPath("/");
+        server.setHandler(context);
+        context.addServlet(new ServletHolder((Servlet) new MetricsServlet()), "/PromethesMmetrics");
+        // Add metrics about CPU, JVM memory etc.
+        DefaultExports.initialize();
+        // Start the webserver.
+        server.start();
+        server.join();
+
     }
 
     public void shutdown() {
