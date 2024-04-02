@@ -131,6 +131,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Configure Git user
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+
       - name: Publish site to GitHub Pages
         run: mvn site site:stage scm-publish:publish-scm -DskipTests
         continue-on-error: true
