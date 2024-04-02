@@ -7,7 +7,7 @@
   <packaging>jar</packaging>
   <name>Emissary</name>
   <description>Distributed P2P Data-driven Workflow Framework</description>
-  <url>https://github.com/NationalSecurityAgency/emissary</url>
+  <url>https://github.com/cfkoehler/emissary</url>
   <organization>
     <name>National Security Agency</name>
     <url>https://code.nsa.gov</url>
@@ -24,16 +24,16 @@
       <id>support</id>
       <name>emissary support</name>
       <email>EmissarySupport@uwe.nsa.gov</email>
-      <url>https://github.com/NationalSecurityAgency/emissary</url>
+      <url>https://github.com/cfkoehler/emissary</url>
       <organization>NSA</organization>
       <timezone>America/New_York</timezone>
     </developer>
   </developers>
   <mailingLists />
   <scm>
-    <connection>scm:git:https://github.com/NationalSecurityAgency/emissary.git</connection>
-    <developerConnection>scm:git:git@github.com:NationalSecurityAgency/emissary.git</developerConnection>
-    <url>https://github.com/NationalSecurityAgency/emissary</url>
+    <connection>scm:git:https://github.com/cfkoehler/emissary.git</connection>
+    <developerConnection>scm:git:git@github.com:cfkoehler/emissaryy.git</developerConnection>
+    <url>https://github.com/cfkoehler/emissary</url>
   </scm>
   <issueManagement>
     <system>GitHub</system>
@@ -43,7 +43,7 @@
   <distributionManagement>
     <site>
       <id>github</id>
-      <url>scm:git:git@github.com:NationalSecurityAgency/emissary.git</url>
+      <url>scm:git:git@github.com:cfkoehler/emissary.git</url>
     </site>
   </distributionManagement>
   <properties>
@@ -1638,7 +1638,7 @@
       <distributionManagement>
         <repository>
           <id>github</id>
-          <url>https://maven.pkg.github.com/NationalSecurityAgency/emissary</url>
+          <url>https://maven.pkg.github.com/cfkoehler/emissary</url>
         </repository>
       </distributionManagement>
     </profile>
