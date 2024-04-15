@@ -51,6 +51,8 @@ public class ResourceWatcher implements Runnable {
     // Things we are tracking
     protected Queue<TimedResource> tracking = new LinkedBlockingQueue<>();
 
+    boolean percentileMetrics = true;
+
     public ResourceWatcher() {
         this(new MetricsManager());
     }
@@ -159,7 +161,11 @@ public class ResourceWatcher implements Runnable {
         for (final Map.Entry<String, Timer> e : this.metrics.getTimers().entrySet()) {
             // We only want to log stats for places that have had events
             if (e.getValue().getCount() > 0) {
-                loggerArg.info(this.metricsFormatter.formatTimer(e.getKey(), e.getValue()));
+                if (percentileMetrics) {
+                    loggerArg.info(this.metricsFormatter.formatTimerWithPercentiles(e.getKey(), e.getValue()));
+                } else {
+                    loggerArg.info(this.metricsFormatter.formatTimer(e.getKey(), e.getValue()));
+                }
             }
         }
     }

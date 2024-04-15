@@ -51,6 +51,13 @@ public class MetricsFormatter {
                 convertDuration(snapshot.getMax()), convertDuration(snapshot.getMean()), timer.getCount());
     }
 
+    public String formatTimerWithPercentiles(final String name, final Timer timer) {
+        final Snapshot snapshot = timer.getSnapshot();
+        return String.format("STAT: %s => min=%2.2f,  max=%2.2f, avg=%2.2f, 95th=%2.2f, 99th=%2.2f , events=%d", name,
+                convertDuration(snapshot.getMin()), convertDuration(snapshot.getMax()), convertDuration(snapshot.getMean()),
+                convertDuration(snapshot.get95thPercentile()), convertDuration(snapshot.get99thPercentile()), timer.getCount());
+    }
+
     protected double convertDuration(final double duration) {
         return duration * this.durationFactor;
     }

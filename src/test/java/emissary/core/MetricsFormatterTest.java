@@ -16,4 +16,12 @@ class MetricsFormatterTest extends UnitTest {
         String s = m.formatTimer("FOO", new Timer());
         assertTrue(s.contains("STAT"), "Formatted string from formatter - " + s);
     }
+
+    @Test
+    void testFormatterPercentile() {
+        MetricsFormatter m = MetricsFormatter.builder().withRateUnit(TimeUnit.SECONDS).withDurationUnit(TimeUnit.SECONDS).build();
+        String s = m.formatTimerWithPercentiles("FOO", new Timer());
+        assertTrue(s.contains("STAT"), "Formatted string from formatter - " + s);
+    }
+
 }
