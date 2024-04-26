@@ -206,12 +206,48 @@ jobs:
             {
               "unfurl_links": false,
               "unfurl_media": false,
+              "text": "PR Merged to main branch (CI in Progress)",
               "blocks": [
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "Test message for complete"
+                    "text": "emissary-main -- Commit: <${{ github.event.pull_request.html_url || github.event.head_commit.url }}|${{ github.sha }}> merged by ${{ github.actor }}.\n"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":white_check_mark: --- Matrix RHEL8 Build"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":white_check_mark: ---CentOs7 Legacy Build"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":white_check_mark: --- MacOs Build"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":white_check_mark: --- Maven Site Build"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":white_check_mark: --- Maven errorProne Build"
                   }
                 }
               ]
