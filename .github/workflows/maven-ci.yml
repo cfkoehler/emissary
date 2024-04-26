@@ -128,13 +128,13 @@ jobs:
       - name: Build with Maven
         run: mvn -B -e -ntp "-Dstyle.color=always" -PerrorProne verify -DskipTests
 
-  slack-notify:
+  slack-notify-start:
     #if: ${{ github.event_name == 'push' && github.repository == 'NationalSecurityAgency/emissary' }}
-    needs: build
+    #needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Publish to slack channel via bot token
-        id: slack
+        id: slack-start
         uses: slackapi/slack-github-action@v1
         with:
           channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
@@ -148,6 +148,34 @@ jobs:
                   "text": {
                     "type": "mrkdwn",
                     "text": "emissary-main -- Commit: <${{ github.event.pull_request.html_url || github.event.head_commit.url }}|${{ github.sha }}> merged by ${{ github.actor }}.\nCI Job Status: *${{ join(needs.*.result, ' ')}}*"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+  slack-notify-end:
+    #if: ${{ github.event_name == 'push' && github.repository == 'NationalSecurityAgency/emissary' }}
+    needs: [slack-notify-start, build, centos7-build, macos-build, site-build, error-prone-build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish to slack channel via bot token
+        id: slack-end
+        uses: slackapi/slack-github-action@v1
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          update-ts: ${{ needs.slack-notify-start.outputs.ts }}
+          payload: |
+            {
+              "unfurl_links": false,
+              "unfurl_media": false,
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Test message for complete"
                   }
                 }
               ]
