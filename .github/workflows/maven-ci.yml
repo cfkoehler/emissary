@@ -151,37 +151,41 @@ jobs:
                     "text": "emissary-main -- Commit: <${{ github.event.pull_request.html_url || github.event.head_commit.url }}|${{ github.sha }}> merged by ${{ github.actor }}.\n"
                   }
                 },
-            	{
+                {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
                     "text": ":stopwatch: --- Matrix RHEL8 Build"
                   }
                 },
-            	{
+                {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
                     "text": ":stopwatch: ---CentOs7 Legacy Build"
-                  },
-            	{
+                  }
+                },
+                {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
                     "text": ":stopwatch: --- MacOs Build"
-                  },
-            	{
+                  }
+                },
+                {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
                     "text": ":stopwatch: --- Maven Site Build"
-                  },
-            	{
+                  }
+                },
+                {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
                     "text": ":stopwatch: --- Maven errorProne Build"
                   }
+                }
               ]
             }
         env:
