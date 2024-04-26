@@ -142,12 +142,21 @@ jobs:
             {
               "unfurl_links": false,
               "unfurl_media": false,
+              "text": "PR Merged to main branch (CI in Progress)",
               "blocks": [
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "emissary-main -- Commit: <${{ github.event.pull_request.html_url || github.event.head_commit.url }}|${{ github.sha }}> merged by ${{ github.actor }}.\nCI Job Status: *${{ join(needs.*.result, ' ')}}*"
+                    "text": "emissary-main -- Commit: <${{ github.event.pull_request.html_url || github.event.head_commit.url }}|${{ github.sha }}> merged by ${{ github.actor }}.\n
+                    | CI Job | Status | Link |
+                    |---|---|---|
+                    | Matrix RHEL8 Build |  | LINK |
+                    | CentOs7 Legacy Build |  | LINK |
+                    | MacOs Build |  | LINK |
+                    | Maven Site Build |  | LINK |
+                    | Maven errorProne Build |  | LINK |\n
+                    "
                   }
                 }
               ]
