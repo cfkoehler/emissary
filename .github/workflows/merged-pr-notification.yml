@@ -1,0 +1,36 @@
+---
+name: "Merged PR Notification"
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  slack-notify:
+    if: ${{ github.event.pull_request.merged }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish to slack channel via bot token
+        id: slack
+        uses: slackapi/slack-github-action@v1
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "unfurl_links": false,
+               "unfurl_media": false,
+               "blocks": [
+                 {
+                   "type": "section",
+                   "text": {
+            
+                     "type": "mrkdwn",
+                     "text": "### PR merged into Emissary branch by *${{ github.actor }}*: \n*PR:* ${{ github.event.pull_request.title }}\n*Author:* ${{ github.event.pull_request.assignee }}\n*Link: *${{ github.event.pull_request.html_url }}"
+                   }
+                 }
+               ]
+             }
+               env:
+                 SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          
+          
