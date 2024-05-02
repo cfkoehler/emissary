@@ -25,7 +25,7 @@ jobs:
                    "text": {
             
                      "type": "mrkdwn",
-                     "text": "PR merged into Emissary ${{ github.base_ref }} branch by *${{ github.actor }}*: \n*Title:* ${{ github.event.pull_request.title }}\n*Link: *${{ github.event.pull_request.html_url }}"
+                     "text": "Pull Request merged into emissary ${{ github.base_ref }} branch by *${{ github.actor }}*: \n*Title:* ${{ github.event.pull_request.title }}\n*Link: *${{ github.event.pull_request.html_url }}"
                    }
                  }
                ]
