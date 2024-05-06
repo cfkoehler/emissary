@@ -1239,6 +1239,9 @@
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
+            <configuration>
+              <formats>XML,HTML</formats>
+            </configuration>
           </plugin>
         </plugins>
       </build>
