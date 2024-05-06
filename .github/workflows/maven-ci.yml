@@ -148,6 +148,9 @@ jobs:
       - name: Build with Maven and Generate Coverage Report
         run: mvn -B -e -ntp "-Dstyle.color=always" -PerrorProne verify -Dcode-quality
 
+      - name: Debug
+        run: ls -la ${{ github.workspace }}/target/site/jacoco/
+
       - name: Add coverage to PR
         id: jacoco
         uses: madrapps/jacoco-report@v1
