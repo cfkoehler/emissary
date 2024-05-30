@@ -130,7 +130,7 @@ jobs:
         run: mvn -B -e -ntp "-Dstyle.color=always" -PerrorProne verify -DskipTests
 
   slack-notify:
-    if: ${{ github.repository == 'NationalSecurityAgency/cfkoehler/emissary' && contains(needs.*.result, 'failure') }}
+    if: ${{ always() && github.repository == 'NationalSecurityAgency/cfkoehler/emissary' && contains(needs.*.result, 'failure') }}
     needs: [build, centos7-build, macos-build, site-build, error-prone-build]
     runs-on: ubuntu-latest
     steps:
