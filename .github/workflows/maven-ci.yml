@@ -145,30 +145,31 @@ jobs:
               "unfurl_media": false,
               attachments: [{
                 color: "${{ contains(needs.*.result, 'failure') && '#A30201' || '#2eb886' }}",  
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "emissary-main CI Failure-- Commit: <${{ github.event.pull_request.html_url || github.event.head_commit.url }}|${{ github.sha }}> merged by ${{ github.actor }}.\nCI Job Status: *${{ join(needs.*.result, ' ')}}*"
-                  },
+                blocks: [
                   {
-                    "type": "divider"
-                  },
-                  {
-                    type: "section",
-                    text: {
-                      type: "mrkdwn",
-                      text:
-                      "${{ contains(needs.*.result, 'failure') }}"
-                      ?
-                      `Failure: (${process.env.AS_COMMIT}). \n Check the job: ${process.env.AS_JOB} for more info;`
-                      :
-                      `Success: (${process.env.AS_COMMIT}). \n by ${process.env.AS_AUTHOR}`
+                    "type": "section",
+                    "text": {
+                      "type": "mrkdwn",
+                      "text": "emissary-main CI Failure-- Commit: <${{ github.event.pull_request.html_url || github.event.head_commit.url }}|${{ github.sha }}> merged by ${{ github.actor }}.\nCI Job Status: *${{ join(needs.*.result, ' ')}}*"
+                    },
+                    {
+                      "type": "divider"
+                    },
+                    {
+                      type: "section",
+                      text: {
+                        type: "mrkdwn",
+                        text:
+                        "${{ contains(needs.*.result, 'failure') }}"
+                        ?
+                        `Failure: (${process.env.AS_COMMIT}). \n Check the job: ${process.env.AS_JOB} for more info;`
+                        :
+                        `Success: (${process.env.AS_COMMIT}). \n by ${process.env.AS_AUTHOR}`
+                      }
                     }
                   }
-                }
-              ]
+                ]
+              }]
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
