@@ -1,0 +1,21 @@
+---
+name: Delete Old Snapshot Maven Artifacts
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Run every day at midnight
+
+jobs:
+  delete-old-snapshots:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Delete old snapshots
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: 'emissary'
+          package-type: 'maven'
+          min-versions-to-keep: 3
+          ignore-versions: '^(0|[1-9]\\d*)\\.0\\.0$'
