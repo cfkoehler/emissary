@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class is used to write out agents status via a logger.
- *
+ * <p>
  * This can be configured in the emissary.roll.RollManager.cfg file, i.e.:"
  *
  * <pre>

@@ -19,6 +19,7 @@ public class MetricsFormatter {
     public static class Builder {
         private TimeUnit durationUnit;
         private TimeUnit rateUnit;
+        private String jsonFormat;
 
         /** Specify the duration unit for the formatter to be built */
         public Builder withDurationUnit(final TimeUnit t) {
@@ -48,6 +49,12 @@ public class MetricsFormatter {
     public String formatTimer(final String name, final Timer timer) {
         final Snapshot snapshot = timer.getSnapshot();
         return String.format("STAT: %s => min=%2.2f,  max=%2.2f, avg=%2.2f, events=%d", name, convertDuration(snapshot.getMin()),
+                convertDuration(snapshot.getMax()), convertDuration(snapshot.getMean()), timer.getCount());
+    }
+
+    public String formatTimerJson(final String name, final Timer timer) {
+        final Snapshot snapshot = timer.getSnapshot();
+        return String.format("{\"name\": \"%s\", \"min\": %2.2f, \"max\": %2.2f, \"avg\": %2.2f, \"events\": %d}", name, convertDuration(snapshot.getMin()),
                 convertDuration(snapshot.getMax()), convertDuration(snapshot.getMean()), timer.getCount());
     }
 
