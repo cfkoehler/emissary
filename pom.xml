@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>gov.nsa.emissary</groupId>
   <artifactId>emissary</artifactId>
-  <version>8.12.0-SNAPSHOT</version>
+  <version>8.14.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>Emissary</name>
   <description>Distributed P2P Data-driven Workflow Framework</description>
@@ -66,6 +66,7 @@
     <dep.httpcore.version>5.2.1</dep.httpcore.version>
     <dep.jackson.version>2.15.2</dep.jackson.version>
     <dep.jakarta.xml.bind-api.version>3.0.1</dep.jakarta.xml.bind-api.version>
+    <dep.janino.version>3.1.12</dep.janino.version>
     <dep.jaxb.runtime.version>3.0.1</dep.jaxb.runtime.version>
     <dep.jdom.version>2.0.6.1</dep.jdom.version>
     <dep.jersey.version>3.1.3</dep.jersey.version>
@@ -117,10 +118,10 @@
     <plugin.maven-source.version>3.2.1</plugin.maven-source.version>
     <!-- seems to have an impact with java 11 integration, update with caution -->
     <plugin.maven-surefire.version>3.1.0</plugin.maven-surefire.version>
-    <plugin.nexus-maven-staging.version>1.6.7</plugin.nexus-maven-staging.version>
+    <plugin.nexus-staging-maven.version>1.6.7</plugin.nexus-staging-maven.version>
     <plugin.sonar-maven.version>3.9.1.2184</plugin.sonar-maven.version>
     <plugin.sortpom-maven.version>2.15.0</plugin.sortpom-maven.version>
-    <plugin.versions-maven.version>2.14.2</plugin.versions-maven.version>
+    <plugin.versions-maven.version>2.17.1</plugin.versions-maven.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <!-- The following properties are used to ignore certain SonarQube rules. -->
@@ -427,7 +428,7 @@
     <dependency>
       <groupId>org.codehaus.janino</groupId>
       <artifactId>janino</artifactId>
-      <version>3.1.7</version>
+      <version>${dep.janino.version}</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
@@ -1500,6 +1501,7 @@
                   -Xep:BooleanParameter:OFF \
                   -Xep:CanIgnoreReturnValueSuggester:OFF \
                   -Xep:DefaultCharset:OFF \
+                  -Xep:InconsistentOverloads:OFF \
                   -Xep:InlineMeSuggester:OFF \
                   -Xep:InlineTrivialConstant:OFF \
                   -Xep:Java7ApiChecker:OFF \

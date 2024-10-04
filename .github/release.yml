@@ -2,35 +2,36 @@
 changelog:
   exclude:
     authors:
-      - github-actions[bot]
+      - github-actions
   categories:
-    - title: New Features
-      labels:
-        - feature
-    - title: Improvements
-      labels:
-        - enhancement
-        - framework
-    - title: Security
-      labels:
-        - security
-    - title: Bug Fixes
-      labels:
-        - bug
-    - title: Dependencies
-      labels:
-        - dependencies
-    - title: Documentation
-      labels:
-        - documentation
-    - title: Automation and Testing
-      labels:
-        - CI/CD
-        - test-only
-    - title: Breaking Changes
+    - title: Breaking Changes 🚨
       labels:
         - major
         - integration
-    - title: Other Changes
+    - title: Bug Fixes 🐞
+      labels:
+        - bug
+    - title: New Features ✨
+      labels:
+        - feature
+    - title: Improvements 🛠
+      labels:
+        - enhancement
+        - framework
+    - title: Security 🔒
+      labels:
+        - security
+    - title: Documentation 📚
+      labels:
+        - documentation
+    - title: Build, Package, Deploy 📦
+      labels:
+        - dependencies
+        - BPD
+    - title: Automation and Testing 🚦
+      labels:
+        - CI/CD
+        - test-only
+    - title: Other Changes ⚙️
       labels:
         - "*"
