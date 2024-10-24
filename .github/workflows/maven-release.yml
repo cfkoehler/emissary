@@ -80,7 +80,9 @@ jobs:
       RELEASE_VERSION: ${{ needs.get_version.outputs.RELEASE_VERSION }}
     steps:
       - name: test outputs
-        run: echo ${{ needs.get_version.outputs.RELEASE_VERSION }}
+        run: |
+          echo $env
+          echo $GITHUB_OUTPUT
       - name: Checkout repo
         uses: actions/checkout@v4
 
