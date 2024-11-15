@@ -234,15 +234,11 @@ public class BaseDataObject implements Serializable, Cloneable, Remote, IBaseDat
     }
 
     /**
-     * {@inheritDoc}
+     * Do not check for Unsafe Data Changes in the BaseDataObject. If a check is necessary use {@link SafeBaseDataObject}.
      */
     @Override
     public void checkForUnsafeDataChanges() {
-        safeUsageChecker.checkForUnsafeDataChanges();
-
-        if (theData != null) {
-            safeUsageChecker.recordSnapshot(theData);
-        }
+        // do nothing for BaseDataObject.
     }
 
     /**
