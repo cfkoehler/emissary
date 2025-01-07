@@ -10,6 +10,8 @@ import emissary.output.roller.journal.KeyedOutput;
 import emissary.pool.AgentPool;
 import emissary.roll.RollManager;
 import emissary.roll.Roller;
+import emissary.spi.ObjectTracing;
+import emissary.spi.ObjectTracingService;
 import emissary.util.io.FileNameGenerator;
 
 import org.apache.commons.lang3.StringUtils;
@@ -182,6 +184,11 @@ public abstract class AbstractRollableFilter extends AbstractFilter {
             code = filter(payloadList, params, ko);
             if (code == STATUS_SUCCESS) {
                 ko.commit();
+            }
+            // TODO: Add check if object trace is enabled/configured
+            for (IBaseDataObject d : payloadList) {
+                ObjectTracingService.emitLifecycleEvent(d, d.getFilename(), ObjectTracing.Stage.DROP_OFF, true, this.filterName,
+                        String.valueOf(ko.getFinalDestination()));
             }
         } catch (IOException e) {
             logger.error("IOException during dropoff.", e);
