@@ -1,0 +1,8 @@
+---
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: emissary
+servers: 1
+agents: 3
+image: docker.io/rancher/k3s:v1.32.2-k3s1
