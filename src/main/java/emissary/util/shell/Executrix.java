@@ -144,6 +144,17 @@ public class Executrix {
         return new TempFileNames(this.tmpDir, this.placeName, this.inFileEnding, this.outFileEnding);
     }
 
+
+    /**
+     * Make a set of temp file names (does not do any disk activity)
+     *
+     * @param inFileEnding the input file ending (extension)
+     * @return new {@link TempFileNames} instance
+     */
+    public TempFileNames createTempFilenames(String inFileEnding) {
+        return new TempFileNames(this.tmpDir, this.placeName, inFileEnding, this.outFileEnding);
+    }
+
     /**
      * Make a set of temp file names (does not do any disk activity)
      *

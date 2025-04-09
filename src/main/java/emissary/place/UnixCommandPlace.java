@@ -280,7 +280,7 @@ public class UnixCommandPlace extends ServiceProviderPlace {
      */
     @SuppressWarnings("CatchingUnchecked")
     protected byte[] runCommandOn(byte[] data) throws ResourceException {
-        TempFileNames names = executrix.createTempFilenames();
+        TempFileNames names = tempFileNameHook();
         String tempDirName = names.getTempDir();
         String inputFileName = names.getInputFilename();
         String outputFileName = names.getOutputFilename();
@@ -391,6 +391,15 @@ public class UnixCommandPlace extends ServiceProviderPlace {
      */
     protected void serviceHook(String serviceType, IBaseDataObject tData, byte[] outputData) {
         logger.warn("Unknown service type: {}", serviceType);
+    }
+
+    /**
+     * Hook to create temp file names
+     *
+     * @return the temp file names
+     */
+    protected TempFileNames tempFileNameHook() {
+        return executrix.createTempFilenames();
     }
 
 
