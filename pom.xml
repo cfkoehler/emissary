@@ -51,6 +51,7 @@
     <EMISSARY_VERSION>${project.version}</EMISSARY_VERSION>
     <argLine />
     <checkstyleFormatter>${project.basedir}/contrib/checkstyle.xml</checkstyleFormatter>
+    <dep.aws-java-sdk.version>1.12.783</dep.aws-java-sdk.version>
     <dep.commons-codec.version>1.18.0</dep.commons-codec.version>
     <dep.commons-collections.version>4.4</dep.commons-collections.version>
     <dep.commons-compress.version>1.27.1</dep.commons-compress.version>
@@ -161,6 +162,21 @@
         <groupId>ch.qos.logback</groupId>
         <artifactId>logback-core</artifactId>
         <version>${dep.logback.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.amazonaws</groupId>
+        <artifactId>aws-java-sdk</artifactId>
+        <version>${dep.aws-java-sdk.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-simpleworkflow</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>com.google.api.grpc</groupId>
@@ -411,6 +427,10 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-java-sdk</artifactId>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
