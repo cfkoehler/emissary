@@ -37,6 +37,7 @@ public class S3DataServer extends Pausable {
     // Thread safe termination
     protected boolean timeToShutdown = false;
 
+    @SuppressWarnings("ThreadPriorityCheck")
     public S3DataServer(S3PickUpPlace parent, int pollingInterval, AWSCredentials awsCredentials, String awsRegion, String inputBucket,
             String loadedBucket) {
         super("S3-" + inputBucket);
@@ -68,21 +69,14 @@ public class S3DataServer extends Pausable {
             for (S3ObjectSummary objectSummary : objects) {
                 logger.info("Processing object: {}", objectSummary.getKey());
 
-                S3Object object = s3.getObject(inputBucket, objectSummary.getKey());
-                byte[] objectPayload;
-                try {
-                    objectPayload = IOUtils.toByteArray(object.getObjectContent());
-                } catch (IOException e) {
-                    logger.error("Error reading S3 object", e);
-                    continue;
-                }
+                byte[] objectPayload = getS3Bytes(inputBucket, objectSummary.getKey());
 
                 if (objectPayload == null) {
                     logger.warn("Empty payload object");
                     // TODO: Do something when empty payload
                 }
 
-                Boolean processed = myParent.processDataPayload(objectPayload, objectSummary.getKey());
+                boolean processed = myParent.processDataPayload(objectPayload, objectSummary.getKey());
                 if (processed) {
                     // Move to loaded S3 Bucket
                     moveObject(inputBucket, loadedBucket, objectSummary.getKey());
@@ -96,7 +90,7 @@ public class S3DataServer extends Pausable {
             // nothing to do for this last round
             if (processedCount == 0) {
                 try {
-                    Thread.sleep(pollingInterval * 1000);
+                    Thread.sleep(pollingInterval * 1000L);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
@@ -123,7 +117,7 @@ public class S3DataServer extends Pausable {
         s3.deleteObject(sourceBucket, objectKey);
     }
 
-    private AmazonS3 amazonS3(AWSCredentials credentials, String region) {
+    private static AmazonS3 amazonS3(AWSCredentials credentials, String region) {
         return AmazonS3ClientBuilder
                 .standard()
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))

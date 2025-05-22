@@ -10,7 +10,9 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 
 import java.io.IOException;
-import java.util.Date;
+import java.time.Instant;
+
+import static emissary.util.TimeUtil.getDateAsISO8601;
 
 public class S3PickUpPlace extends PickUpPlace implements IPickUpPlace {
 
@@ -45,7 +47,7 @@ public class S3PickUpPlace extends PickUpPlace implements IPickUpPlace {
     public boolean processDataPayload(byte[] payload, String objectKey) {
         IBaseDataObject dataObject = DataObjectFactory.getInstance(payload, objectKey);
         dataObject.setParameter("originalFilename", objectKey);
-        dataObject.putParameter("processingDateTime", emissary.util.TimeUtil.getDateAsISO8601(new Date().getTime()));
+        dataObject.putParameter("processingDateTime", getDateAsISO8601(Instant.now()));
 
         dataObject.setCurrentForm("UNKNOWN"); // TODO: use config option
         dataObject.setFileType("UNKNOWN");

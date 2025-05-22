@@ -163,20 +163,41 @@
         <artifactId>logback-core</artifactId>
         <version>${dep.logback.version}</version>
       </dependency>
+      <!--      <dependency>-->
+      <!--        <groupId>com.amazonaws</groupId>-->
+      <!--        <artifactId>aws-java-sdk</artifactId>-->
+      <!--        <version>${dep.aws-java-sdk.version}</version>-->
+      <!--        <exclusions>-->
+      <!--          <exclusion>-->
+      <!--            <groupId>com.amazonaws</groupId>-->
+      <!--            <artifactId>aws-java-sdk-simpleworkflow</artifactId>-->
+      <!--          </exclusion>-->
+      <!--          <exclusion>-->
+      <!--            <groupId>commons-logging</groupId>-->
+      <!--            <artifactId>commons-logging</artifactId>-->
+      <!--          </exclusion>-->
+      <!--        </exclusions>-->
+      <!--      </dependency>-->
       <dependency>
         <groupId>com.amazonaws</groupId>
-        <artifactId>aws-java-sdk</artifactId>
+        <artifactId>aws-java-sdk-core</artifactId>
         <version>${dep.aws-java-sdk.version}</version>
         <exclusions>
-          <exclusion>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-simpleworkflow</artifactId>
-          </exclusion>
           <exclusion>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
           </exclusion>
         </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>com.amazonaws</groupId>
+        <artifactId>aws-java-sdk-rekognition</artifactId>
+        <version>${dep.aws-java-sdk.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.amazonaws</groupId>
+        <artifactId>aws-java-sdk-s3</artifactId>
+        <version>${dep.aws-java-sdk.version}</version>
       </dependency>
       <dependency>
         <groupId>com.google.api.grpc</groupId>
@@ -428,9 +449,22 @@
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-core</artifactId>
     </dependency>
+    <!--    <dependency>-->
+    <!--      &lt;!&ndash;      TODO: Reduce to only the packages that are needed&ndash;&gt;-->
+    <!--      <groupId>com.amazonaws</groupId>-->
+    <!--      <artifactId>aws-java-sdk</artifactId>-->
+    <!--    </dependency>-->
     <dependency>
       <groupId>com.amazonaws</groupId>
-      <artifactId>aws-java-sdk</artifactId>
+      <artifactId>aws-java-sdk-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-java-sdk-rekognition</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-java-sdk-s3</artifactId>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>

@@ -42,3 +42,4 @@ megalinter-reports
 
 # Maven stuff
 pom.xml.versionsBackup
+/.env
