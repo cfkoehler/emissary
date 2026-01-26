@@ -145,7 +145,7 @@ public class ConfigUtil {
         projectRoot = System.getenv(ConfigUtil.PROJECT_BASE_ENV);
 
         configDirProperty = System.getProperty(CONFIG_DIR_PROPERTY, "").replace('\\', '/');
-        if (configDirProperty.equals("")) {
+        if (configDirProperty.isEmpty()) {
             logger.error("You must set -Demissary.config.dir, it was empty");
             throw new EmissaryException("-Demissary.config.dir was not set");
         } else if (configDirProperty.equals("/tmp")) {
@@ -290,9 +290,34 @@ public class ConfigUtil {
      * Get the ServiceConfigGuide for the named class
      */
     public static Configurator getConfigInfo(final Class<?> c) throws IOException {
-        final String name = c.getName() + CONFIG_FILE_ENDING;
-        logger.debug("Loading config for (class) {}", name);
-        return getConfigInfo(getConfigStream(name), name);
+        final String base = c.getName();
+        final String cfgName = base + CONFIG_FILE_ENDING;
+        final String yamlName = base + YAML_FILE_ENDING;
+        final String ymlName = base + YML_FILE_ENDING;
+
+        IOException last = null;
+        // Try .cfg
+        try {
+            enforceSingleFormat(cfgName);
+            return getConfigInfo(getConfigStream(cfgName), cfgName);
+        } catch (IOException ex) {
+            last = ex;
+        }
+        // Try .yaml
+        try {
+            enforceSingleFormat(yamlName);
+            return getConfigInfo(getConfigStream(yamlName), yamlName);
+        } catch (IOException ex) {
+            last = ex;
+        }
+        // Try .yml
+        try {
+            enforceSingleFormat(ymlName);
+            return getConfigInfo(getConfigStream(ymlName), ymlName);
+        } catch (IOException ex) {
+            last = ex;
+        }
+        throw last != null ? last : new IOException("No config stream available for " + base);
     }
 
     /**
@@ -344,6 +369,8 @@ public class ConfigUtil {
      */
     public static Configurator getConfigInfo(final String name) throws IOException {
         logger.debug("Loading config for (string) {}", name);
+        // detect format and enforce single format per base
+        enforceSingleFormat(name);
         return getConfigInfo(getConfigStream(name), name);
     }
 
@@ -365,20 +392,22 @@ public class ConfigUtil {
      * @return configurator object
      */
     public static Configurator getConfigInfo(final InputStream is, final String name) throws IOException {
-        final ServiceConfigGuide scg = new ServiceConfigGuide(is, name);
+        final boolean isYaml = name.endsWith(YAML_FILE_ENDING) || name.endsWith(YML_FILE_ENDING);
+        final ServiceConfigGuide scgBase = isYaml ? new YamlServiceConfigGuide(is, name) : new ServiceConfigGuide(is, name);
 
         final String[] flavoredNames = addFlavors(name);
         for (final String flavoredName : flavoredNames) {
             try {
                 logger.debug("Attempting flavor merge on {}", flavoredName);
+                enforceSingleFormat(flavoredName);
                 final Configurator flavoredConfig = getConfigInfo(flavoredName);
-                scg.merge(flavoredConfig);
+                scgBase.merge(flavoredConfig);
                 logger.debug("Merged config with {}", flavoredName);
             } catch (IOException iox) {
                 logger.debug("Unable to opt import flavor config {}", flavoredName);
             }
         }
-        return scg;
+        return scgBase;
     }
 
     /**
@@ -518,10 +547,9 @@ public class ConfigUtil {
      */
     @SuppressWarnings("AvoidObjectArrays")
     public static String[] addFlavors(final String name) {
-        if (configFlavors == null || configFlavors.length() == 0) {
+        if (configFlavors == null || configFlavors.isEmpty()) {
             return new String[0];
         }
-
         final int pos = name.lastIndexOf('.');
         final String base = pos > -1 ? name.substring(0, pos) : name;
         final String suffix = pos > -1 ? name.substring(pos) : "";
@@ -710,6 +738,48 @@ public class ConfigUtil {
             } catch (IOException e) {
                 logger.error("Cannot process {}: {}", arg, e.getLocalizedMessage());
             }
+        }
+    }
+
+    private static final String YAML_FILE_ENDING = ".yaml";
+    private static final String YML_FILE_ENDING = ".yml";
+
+    private static void enforceSingleFormat(final String name) throws IOException {
+        final int pos = name.lastIndexOf('.');
+        if (pos < 0)
+            return;
+        final String base = name.substring(0, pos);
+        final String cfgName = base + CONFIG_FILE_ENDING;
+        final String yamlName = base + YAML_FILE_ENDING;
+        final String ymlName = base + YML_FILE_ENDING;
+        final boolean cfgExists = existsConfig(cfgName);
+        final boolean yamlExists = existsConfig(yamlName) || existsConfig(ymlName);
+        // Only conflict if both formats are present
+        if (cfgExists && yamlExists) {
+            logger.warn("Config conflict: both formats present for base {} (.cfg and YAML). Only one format supported.", base);
+            throw new IOException("Mixed config formats detected for " + base + "; startup aborted.");
+        }
+    }
+
+    private static boolean existsConfig(final String name) {
+        try {
+            String sname = getConfigFile(name);
+            File f = new File(sname);
+            if (f.exists() && f.canRead()) {
+                return true;
+            }
+            final List<String> reznames = toResourceName(name);
+            for (final String rezname : reznames) {
+                final URL url = new ResourceReader().getResource(rezname);
+                if (url != null) {
+                    return true;
+                }
+            }
+            sname = getOldStyleConfigFile(name);
+            f = new File(sname);
+            return f.exists() && f.canRead();
+        } catch (RuntimeException e) {
+            return false;
         }
     }
 }

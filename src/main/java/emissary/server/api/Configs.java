@@ -7,6 +7,7 @@ import emissary.config.ConfigEntry;
 import emissary.config.ConfigUtil;
 import emissary.config.Configurator;
 import emissary.config.ServiceConfigGuide;
+import emissary.config.YamlServiceConfigGuide;
 
 import com.google.common.collect.Lists;
 import jakarta.ws.rs.GET;
@@ -99,9 +100,12 @@ public class Configs {
         ConfigList detailed = new ConfigList();
         List<String> flavors = ConfigUtil.getFlavors();
 
-        // default config
-        detailed.addConfig(new Config(Collections.emptyList(), Collections.singletonList(cfg),
-                normalizeEntries(new ServiceConfigGuide(ConfigUtil.getConfigStream(cfg), cfg))));
+        // default config (single file only)
+        boolean isYaml = cfg.endsWith(".yaml") || cfg.endsWith(".yml");
+        Configurator baseCfg = isYaml
+                ? new YamlServiceConfigGuide(ConfigUtil.getConfigStream(cfg), cfg)
+                : new ServiceConfigGuide(ConfigUtil.getConfigStream(cfg), cfg);
+        detailed.addConfig(new Config(Collections.emptyList(), Collections.singletonList(cfg), normalizeEntries(baseCfg)));
 
         // flavored configs
         String[] flavoredCfgs = ConfigUtil.addFlavors(cfg);
@@ -126,7 +130,11 @@ public class Configs {
         if (StringUtils.isBlank(config) || config.contains("\\") || config.contains("/") || config.contains("..") || config.endsWith(".")) {
             throw new IllegalArgumentException("Invalid config name: " + config);
         }
-        return Strings.CS.appendIfMissing(config.trim(), CONFIG_FILE_ENDING);
+        String trimmed = config.trim();
+        if (trimmed.endsWith(".cfg") || trimmed.endsWith(".yaml") || trimmed.endsWith(".yml")) {
+            return trimmed;
+        }
+        return Strings.CS.appendIfMissing(trimmed, CONFIG_FILE_ENDING);
     }
 
     /**

@@ -791,3 +791,42 @@ nslookup somehost
 ```
 
 If you have this situation, then it is recommended to use [Google's DNS servers](https://developers.google.com/speed/public-dns/docs/using).
+
+## YAML place configs
+
+Emissary supports `.yaml`/`.yml` configs alongside `.cfg`. YAML can be nested; keys are flattened using dot-notation.
+
+Rules and behavior:
+- Top-level must be a mapping (object). Sequences at top-level are not allowed.
+- Nested maps flatten with dots: `parent: { child: value }` -> `parent.child = value`.
+- Sequences (lists) become multiple entries under the same key.
+- Scalars are coerced to strings for downstream compatibility.
+- Flavors work the same as `.cfg`: `Place.yaml`, `Place-dev.yaml`, merged in order.
+- Single-format policy: for a given base name (including flavors), do not mix `.cfg` and `.yaml`/`.yml`. If both exist, startup fails.
+
+Unsupported (initial) YAML features:
+- Anchors/aliases, custom tags, and binary scalars are not supported.
+- Complex types may be rejected; non-strings are stringified.
+
+Migration tips:
+- Convert flat `.cfg` lines to YAML by grouping related keys into nested objects where it improves readability.
+- Keep keys consistent when flattening (dot-notation) to avoid surprises in places expecting specific key names.
+- Migrate one place at a time to avoid single-format conflicts.
+
+Examples:
+
+CFG:
+- `SERVICE_KEY = FOO.ID.FooPlace.http://host:8001/FooPlace`
+- `output.form = MY_FORM`
+- `allowedForms = A`
+- `allowedForms = B`
+
+YAML:
+```yaml
+SERVICE_KEY: FOO.ID.FooPlace.http://host:8001/FooPlace
+output:
+  form: MY_FORM
+allowedForms:
+  - A
+  - B
+```
