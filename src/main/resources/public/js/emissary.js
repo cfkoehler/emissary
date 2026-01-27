@@ -7,7 +7,10 @@ $(document).ready(function () {
     }
   });
 
-  $.get('/emissary/Nav.action', function( data ) {
+  // Read context prefix from meta tag
+  var contextPrefix = $('meta[name="context-prefix"]').attr('content') || '';
+
+  $.get(contextPrefix + '/emissary/Nav.action', function( data ) {
     $('header').prepend(data);
 
     var url = window.location.pathname;

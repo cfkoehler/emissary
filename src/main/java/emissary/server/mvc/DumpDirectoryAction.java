@@ -106,6 +106,9 @@ public class DumpDirectoryAction {
             map.put("errors", errors);
         }
 
+        String contextPath = (request != null) ? request.getContextPath() : null;
+        map.put("contextPrefix", contextPath != null ? contextPath : "");
+
         return map;
     }
 

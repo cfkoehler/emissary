@@ -1,6 +1,9 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="context-prefix" content="{{contextPrefix}}">
     <title>Unpause</title>
     <link rel="stylesheet" href="/css/lib/bootstrap.min.css">
     <link type="text/css" rel="stylesheet" href="/css/emissary.css"/>
@@ -21,7 +24,8 @@
 
   <script>
     $(document).ready(function () {
-        doPost('/api/unpause', 'czar-message');
+        var contextPrefix = $('meta[name="context-prefix"]').attr('content') || '';
+        doPost(contextPrefix + '/api/unpause', 'czar-message');
     });
   </script>
 

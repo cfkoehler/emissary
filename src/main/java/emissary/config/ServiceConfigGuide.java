@@ -186,6 +186,16 @@ public class ServiceConfigGuide implements Configurator, Serializable {
         this.values.put("OS.NAME", System.getProperty("os.name").replace(' ', '_'));
         this.values.put("OS.VER", System.getProperty("os.version").replace(' ', '_'));
         this.values.put("OS.ARCH", System.getProperty("os.arch").replace(' ', '_'));
+
+        // Add context path prefix support
+        String contextPrefix = System.getProperty("emissary.context.prefix", "");
+        if (!contextPrefix.isEmpty() && !contextPrefix.startsWith("/")) {
+            contextPrefix = "/" + contextPrefix;
+        }
+        if (contextPrefix.endsWith("/")) {
+            contextPrefix = contextPrefix.substring(0, contextPrefix.length() - 1);
+        }
+        this.values.put("CONTEXT_PREFIX", contextPrefix);
     }
 
     /**

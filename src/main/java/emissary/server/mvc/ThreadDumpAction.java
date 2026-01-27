@@ -3,9 +3,11 @@ package emissary.server.mvc;
 import emissary.util.Version;
 
 import jakarta.annotation.Nullable;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import org.glassfish.jersey.server.mvc.Template;
 
@@ -25,6 +27,18 @@ public class ThreadDumpAction {
     @Path("/Threaddump.action")
     @Produces(MediaType.TEXT_HTML)
     @Template(name = "/threaddumps")
+    public Map<String, Object> getThreaddumps(@Context HttpServletRequest request) {
+        Map<String, Object> model = getThreaddumps();
+        String contextPath = (request != null) ? request.getContextPath() : null;
+        model.put("contextPrefix", contextPath != null ? contextPath : "");
+        return model;
+    }
+
+    /**
+     * Get thread dump information without HTTP context. Used internally for logging and programmatic access.
+     *
+     * @return map containing thread dump data
+     */
     public Map<String, Object> getThreaddumps() {
         ThreadMXBean tmbean = ManagementFactory.getThreadMXBean();
 

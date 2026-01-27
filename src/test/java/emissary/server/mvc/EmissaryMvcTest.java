@@ -79,7 +79,7 @@ class EmissaryMvcTest extends EndpointTestBase {
         try {
             Map<String, Object> out = action.getNamespace(request);
             assertNotNull(out);
-            assertEquals(1, out.size());
+            assertEquals(2, out.size()); // namespaces + contextPrefix
             Object namespaceInfoSet = out.get("namespaces");
             assertInstanceOf(Set.class, namespaceInfoSet);
             AtomicBoolean found = new AtomicBoolean(false);

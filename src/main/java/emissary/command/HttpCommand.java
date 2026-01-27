@@ -47,6 +47,8 @@ public abstract class HttpCommand extends BaseCommand {
             description = "disable SNI hostname check when there is an SNI certificate\nDefault: ${DEFAULT-VALUE}")
     private boolean sniDisabled = false;
 
+    protected String contextPathPrefix = "";
+
     public int getDefaultPort() {
         return DEFAULT_PORT;
     }
@@ -79,6 +81,10 @@ public abstract class HttpCommand extends BaseCommand {
         return sniDisabled;
     }
 
+    public String getContextPathPrefix() {
+        return contextPathPrefix;
+    }
+
     @Override
     public void setupCommand() {
         setupHttp();
@@ -86,6 +92,18 @@ public abstract class HttpCommand extends BaseCommand {
 
     public void setupHttp() {
         setupConfig();
+
+        // Read and validate context path prefix
+        contextPathPrefix = System.getProperty("emissary.context.prefix", "");
+        if (!contextPathPrefix.isEmpty()) {
+            if (!contextPathPrefix.startsWith("/")) {
+                contextPathPrefix = "/" + contextPathPrefix;
+            }
+            if (contextPathPrefix.endsWith("/")) {
+                contextPathPrefix = contextPathPrefix.substring(0, contextPathPrefix.length() - 1);
+            }
+        }
+
         if (getJettyUserFile() != null) {
             LOG.debug("Setting {} to {}", EmissaryClient.JETTY_USER_FILE_PROPERTY_NAME, getJettyUserFile().getAbsolutePath());
             System.setProperty(EmissaryClient.JETTY_USER_FILE_PROPERTY_NAME, getJettyUserFile().getAbsolutePath());
@@ -154,6 +172,6 @@ public abstract class HttpCommand extends BaseCommand {
      * @return the full url
      */
     protected String getFullUrl(String endpoint) {
-        return getScheme() + "://" + getHostAndPort() + endpoint;
+        return getScheme() + "://" + getHostAndPort() + contextPathPrefix + endpoint;
     }
 }

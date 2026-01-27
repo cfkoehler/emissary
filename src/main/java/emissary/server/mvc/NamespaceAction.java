@@ -37,6 +37,8 @@ public class NamespaceAction {
         }
 
         model.put("namespaces", namespaces);
+        String contextPath = (request != null) ? request.getContextPath() : null;
+        model.put("contextPrefix", contextPath != null ? contextPath : "");
 
         return model;
     }

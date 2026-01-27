@@ -22,6 +22,8 @@ public class ShutdownAction {
     public Map<String, String> notifyShutdown(@Context HttpServletRequest request) {
         Map<String, String> model = new HashMap<>();
         model.put("message", "Starting shutdown...");
+        String contextPath = (request != null) ? request.getContextPath() : null;
+        model.put("contextPrefix", contextPath != null ? contextPath : "");
         return model;
     }
 

@@ -139,6 +139,11 @@ public class EmissaryServer {
         return cmd;
     }
 
+    private String getContextPathPrefix() {
+        String prefix = cmd.getContextPathPrefix();
+        return (prefix == null || prefix.isEmpty()) ? "" : prefix;
+    }
+
     /**
      * Creates and starts a server that is bound into the local Namespace using DEFAULT_NAMESPACE_NAME and returned
      *
@@ -150,19 +155,20 @@ public class EmissaryServer {
             // Resource.setDefaultUseCaches(false);
 
             // needs to be loaded first into the server as it setups up Emissary stuff
+            String prefix = getContextPathPrefix();
             ContextHandler emissaryHandler = buildEmissaryHandler();
             // TODO: rework this, no need for it be set with a context path but if this
             // is left out, it matches / and nothing works correctly
-            emissaryHandler.setContextPath("/idontreallyservecontentnowdoi");
+            emissaryHandler.setContextPath(prefix + "/idontreallyservecontentnowdoi");
             ContextHandler lbConfigHandler = buildLogbackConfigHandler();
-            lbConfigHandler.setContextPath("/lbConfig");
+            lbConfigHandler.setContextPath(prefix + "/lbConfig");
             ContextHandler apiHandler = buildApiHandler();
-            apiHandler.setContextPath("/api");
+            apiHandler.setContextPath(prefix + "/api");
             ContextHandler mvcHandler = buildMvcHandler();
-            mvcHandler.setContextPath("/emissary");
+            mvcHandler.setContextPath(prefix + "/emissary");
             // needs to be loaded last into the server so other contexts can match or fall through
             ContextHandler staticHandler = buildStaticHandler();
-            staticHandler.setContextPath("/");
+            staticHandler.setContextPath(prefix + "/");
 
             LoginService loginService = buildLoginService();
             ConstraintSecurityHandler security = buildSecurityHandler();
