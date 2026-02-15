@@ -344,6 +344,7 @@ class EmissaryApiTest extends EndpointTestBase {
 
             String hostAndPort = ApiUtils.getHostAndPort();
             assertEquals("localhost:8001", hostAndPort);
+            assertEquals("localhost:9001", hostAndPort);
 
             Namespace.unbind("EmissaryServer");
             result = ApiUtils.getHostAndPort();

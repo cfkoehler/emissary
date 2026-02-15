@@ -121,28 +121,46 @@ jobs:
         run: mvn -B -e -ntp "-Dstyle.color=always" site -Pcoverage,pmd
 
   slack-notify:
-    if: ${{ github.event_name == 'push' && github.repository == 'NationalSecurityAgency/emissary' }}
-    needs: build
+    if: ${{ always() }}
+    needs: [build, centos7-build, macos-build, site-build, error-prone-build]
     runs-on: ubuntu-latest
     steps:
       - name: Publish to slack channel via bot token
         id: slack
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: slackapi/slack-github-action@v1
         with:
           channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
           payload: |
             {
               "unfurl_links": false,
               "unfurl_media": false,
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "emissary-main -- Commit: <${{ github.event.pull_request.html_url || github.event.head_commit.url }}|${{ github.sha }}> merged by ${{ github.actor }}.\nCI Job Status: *${{ join(needs.*.result, ' ')}}*"
+              attachments: [{
+                color: "${{ contains(needs.*.result, 'failure') && '#A30201' || '#2eb886' }}",  
+                blocks: [
+                  {
+                    "type": "section",
+                    "text": {
+                      "type": "mrkdwn",
+                      "text": "emissary-main CI Failure-- Commit: <${{ github.event.pull_request.html_url || github.event.head_commit.url }}|${{ github.sha }}> merged by ${{ github.actor }}.\nCI Job Status: *${{ join(needs.*.result, ' ')}}*"
+                    },
+                    {
+                      "type": "divider"
+                    },
+                    {
+                      type: "section",
+                      text: {
+                        type: "mrkdwn",
+                        text:
+                        "${{ contains(needs.*.result, 'failure') }}"
+                        ?
+                        `Failure: (${process.env.AS_COMMIT}). \n Check the job: ${process.env.AS_JOB} for more info;`
+                        :
+                        `Success: (${process.env.AS_COMMIT}). \n by ${process.env.AS_AUTHOR}`
+                      }
+                    }
                   }
-                }
-              ]
+                ]
+              }]
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
