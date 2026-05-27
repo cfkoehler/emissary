@@ -85,14 +85,27 @@ Deploy a Layer-7 proxy as a Kubernetes Deployment in front of Triton (or any gRP
   - Additional cost (pod resources).
   - HTTP/2 + gRPC proxying requires correct config (HAProxy needs `mode http` with `proto h2`; Envoy is purpose-built and easier).
 
-### Option E — xDS / look-aside load balancing (e.g., Istio, gRPC-xDS)
+### Option E — Lightweight xDS look-aside (control plane only, no data plane)
 
-Use the `xds:///` target scheme with an xDS control plane (Istio service mesh or standalone gRPC-xDS). The control plane pushes endpoint and policy updates to clients out-of-band.
+Use the `xds:///service-name` target scheme with a **control-plane-only** xDS server such as [wongnai/xds](https://github.com/wongnai/xds). The control plane watches Kubernetes endpoints and pushes endpoint updates to gRPC clients via the [xDS streaming protocol](https://www.envoyproxy.io/docs/envoy/latest/api-docs/xds_protocol). gRPC-java's built-in `xds` resolver applies updates to the channel within seconds — no proxy data path, no sidecars, no mesh injection. This is the "look-aside LB" pattern from the original gRPC LB design and is what makes the xDS approach distinct from a full service mesh.
 
-- **Complexity:** High operationally. Requires an xDS control plane and per-cluster integration.
-- **Pros:** Industry-standard, most powerful, supports advanced policies (weighted, locality-aware, outlier detection).
-- **Cons:** Way out of scale for the problem at hand unless we're already adopting a service mesh. Listed for completeness only.
-- **Recommendation:** Defer unless service-mesh adoption is already on the roadmap.
+- **Complexity:** Medium. ~1 control-plane Deployment (a few hundred lines of YAML and a maintained off-the-shelf image), plus per-Place config flips from `host:port` to `xds:///service-name`, plus a gRPC bootstrap config delivered via the `GRPC_XDS_BOOTSTRAP_CONFIG` env var on every emissary process. Add `grpc-xds` to the maven dependencies. No new Java code in emissary itself if we keep `ChannelManager.create()`'s target format flexible.
+- **Pros:**
+  - **Sub-second** new-pod discovery — well past the 1–2 min target.
+  - Solves the problem for **every** gRPC backend uniformly, with no per-server config and no per-Place code.
+  - No data-plane hop, no added latency, no proxy HA to operate.
+  - Standard `xds:///` is the long-term gRPC ecosystem direction; investment compounds if/when a mesh follows.
+  - Decouples LB policy from app code — can roll out weighted, locality-aware, or health-aware balancing as a control-plane config change later.
+- **Cons:**
+  - Adds a new infrastructure component to deploy, monitor, upgrade, and on-call for.
+  - Bootstrap config delivery to every emissary pod is a new ops concern (typically a ConfigMap mount + env var).
+  - Failure mode if the control plane is unavailable depends on gRPC-java's xDS cache behavior — needs verification.
+  - `wongnai/xds` is community-maintained and lightweight; if it stops being maintained we'd be on the hook. (Alternatives exist: `go-control-plane`-based custom server, or the gRPC team's reference impls.)
+  - Slightly more nuanced than the "one Java change" of Option A — but materially less than a full service mesh.
+
+### Option F — Full service mesh (Istio / Linkerd / Consul Connect)
+
+A full mesh with sidecars, mTLS, and unified policy. Listed for completeness; not under consideration. Lightweight xDS (Option E) is a stepping stone toward this if it ever becomes appropriate.
 
 ---
 
@@ -104,31 +117,52 @@ Use the `xds:///` target scheme with an xDS control plane (Istio service mesh or
 | B. `MAX_CONNECTION_AGE` | None / tiny | Server config | N minutes (age) | Yes | Very low |
 | C. Custom NameResolver | Medium (emissary) | RBAC if K8s API | Seconds | None | Medium |
 | D. Proxy (HAProxy/Envoy) | None | Deploy + operate proxy | Seconds (K8s-driven) | None | Medium |
-| E. xDS look-aside | Small (config) | Control plane | Seconds | None | High |
+| E. Lightweight xDS look-aside | Tiny (target scheme + dep + bootstrap) | Deploy + operate control plane | Sub-second | None | Medium |
+| F. Full service mesh | Small (config) | Mesh install + ops | Sub-second | None | High |
 
 ---
 
 ## Team constraints (confirmed)
 
 - We run **multiple gRPC backends**, not just Triton/Vista. We control the **deployment** (manifests, server flags) but **not the container image / source** for some of them.
-- Acceptable new-pod discovery latency is **1–2 minutes**.
-- **No service-mesh adoption** planned in the near term.
+- Acceptable new-pod discovery latency is **1–2 minutes** as a baseline; sub-second is welcomed if cheap.
+- **Team is exploring lightweight xDS look-aside (Option E)** as the long-term direction, using a control-plane-only server like `wongnai/xds`. Full service mesh (Option F) is **not** on the table.
 
 ## Recommendation
 
-**Land Option A and use Option B wherever the server supports it.**
+**Target Option E (lightweight xDS look-aside) as the durable solution. Use Option A as an optional short-term bridge only if HPA pain is acute *now*.**
 
-1. **Option A — periodic channel refresh in emissary (primary fix).** Add the refresh mechanism in `emissary.grpc.pool` with a default interval of ~60s (well inside the 1–2 min target). This is one change that covers every current and future gRPC Place, and removes the dependency on each backend's server flags. Opt-in per Place via config; default off so existing deployments are unaffected until they enable it.
-2. **Option B — set `MAX_CONNECTION_AGE` on every server where the flag is available.** Since we control deployment for all our gRPC services, we can pass this flag (typically a server CLI arg or env var, not a build-time setting) on Triton, Vista, and any others that expose it. Use a value like 5min + 30s grace + jitter. This complements Option A: even if the client-side refresh is turned off or fails, the server still forces eventual reconnection.
+1. **Option E — long-term, durable fix.** Stand up a control-plane-only xDS server (e.g., `wongnai/xds`) that watches K8s endpoints. Add the `grpc-xds` dependency to emissary, allow `ChannelManager.create()` to use `xds:///service-name` targets, and deliver the gRPC bootstrap config via env var + ConfigMap to every emissary pod. After this lands, every gRPC Place is rebalanced in sub-second time on HPA events, with no per-Place or per-server config to maintain.
+2. **Option A — optional bridge.** If the HPA stall is hurting production today and Option E will take more than a sprint or two to land, ship the periodic channel refresh first as a contained emissary change. It meets the 1–2 min target and is throwaway code we'd remove once E is live. **If pain is tolerable, skip A and put the engineering time into landing E directly** — A is dead weight once xDS is in place.
+3. **Option B — keep on the table as defense in depth.** Setting `MAX_CONNECTION_AGE` on servers we deploy costs nothing and is useful even after E lands (it limits the worst-case stale-state window if the control plane has issues). Worth doing opportunistically; not a primary fix.
 
-Together these are belt-and-suspenders: A guarantees coverage; B gives clean GOAWAY semantics on the servers that support it.
-
-**Defer Options C, D, E.**
-- **D (Envoy proxy)** is the natural next step *if* this stops being enough — e.g., we want sub-second rebalancing, richer observability, or we start adopting a mesh. With no mesh plans and a 1–2 min target, Option A alone meets the requirement at a fraction of the operational cost.
-- **C (custom NameResolver)** mostly duplicates what Envoy does, with more code to own. Skip unless Option A proves insufficient and we still don't want a proxy.
-- **E (xDS)** is off the table until a service-mesh decision is made.
+**Decline Options C, D, F.**
+- **C (custom NameResolver)** reinvents what gRPC's xds resolver already provides. Once we're going to E, C has no role.
+- **D (Envoy proxy)** adds a data-plane hop that E specifically avoids. Skip.
+- **F (full service mesh)** is explicitly out of scope. E is the stepping stone if a mesh is ever wanted later.
 
 ---
+
+## Implementation sketch (Option E — recommended target)
+
+**Infrastructure (most of the work is here):**
+- Deploy a control-plane-only xDS server in-cluster. `wongnai/xds` is a reasonable starting point; alternatives: a `go-control-plane`-based custom server, or `gloo`/`cilium` if already in the stack.
+  - Give it a ServiceAccount with RBAC to read Endpoints / EndpointSlices for the relevant namespaces.
+  - Run ≥2 replicas behind a normal ClusterIP Service so the control plane itself is HA.
+  - Expose its xDS gRPC port (typically `18000`).
+- Author a gRPC bootstrap JSON (see [grpc-java xDS docs](https://github.com/grpc/grpc-java/tree/master/xds)) that points at the control-plane Service. Ship it as a ConfigMap mounted into each emissary pod. Set `GRPC_XDS_BOOTSTRAP_CONFIG` (or `GRPC_XDS_BOOTSTRAP`) env var to the file path.
+
+**Emissary changes (small):**
+- `pom.xml` — add `io.grpc:grpc-xds`.
+- `src/main/java/emissary/grpc/channel/ChannelManager.java` — let `target` accept arbitrary gRPC target URIs (today it's hard-coded to `host + ":" + port`). Either add a `GRPC_CHANNEL_TARGET_OVERRIDE` config key, or let `GRPC_HOST` accept a full URI like `xds:///inference-service`. Same `defaultLoadBalancingPolicy("round_robin")` setting continues to work — `round_robin` operates over xDS-supplied endpoints exactly as it does over DNS-resolved ones.
+- Place configs — update `GRPC_HOST_*` entries to `xds:///service-name` for the migrated backends. Roll out one Place at a time.
+
+**Verification:**
+- Stand up the control plane in a dev cluster pointed at a Triton-like backend behind a normal (non-headless) Service.
+- Drive load through emissary with `GRPC_HOST=xds:///triton`. Confirm RPCs land on all backend pods.
+- Scale the backend up (HPA or manual). Confirm new pods receive traffic within seconds — verified via per-pod metrics on the backend.
+- Kill a backend pod. Confirm clients re-balance immediately.
+- Kill the control plane. Confirm clients continue serving from cached endpoints for at least a few minutes (verify gRPC-java xDS resolver cache behavior; this is the failure mode that most needs to be measured).
 
 ## Interaction with open PR #1400 ("New gRPC channel manager")
 
@@ -178,7 +212,9 @@ For Option D (proxy): standard L7 proxy validation — `kubectl rollout restart`
 
 ## Open questions for the team
 
-1. Which of our gRPC servers actually expose a `MAX_CONNECTION_AGE` (or equivalent) flag we can pass via deployment? Triton does (`--grpc-max-connection-age`); we should inventory the rest.
-2. What refresh interval should Option A default to? 60s is inside the 1–2 min target and gives a reasonable safety margin; shorter trades reconnect churn for faster discovery.
-3. Should Option A's refresh be opt-in per Place or opt-out (default-on framework-wide)? Opt-in is safer to roll out; opt-out gives more immediate coverage.
-4. Are any of our gRPC Places using long-running streaming RPCs that would be disrupted by a forced refresh? (Inference-style unary RPCs are fine; streaming needs more thought.)
+1. **Urgency of the HPA stall**: do we need a fix in days (→ land Option A as a bridge while Option E is built) or weeks (→ go straight to Option E and skip A)? Drives whether A is worth doing at all.
+2. **Control-plane ownership**: which team owns the xDS control plane in production — platform/infra, or this team? Affects timeline and on-call story.
+3. **Control-plane availability behavior**: what happens to traffic when the xDS server is unreachable? gRPC-java's xDS client caches endpoints, but we need to characterize the failure window and decide whether to run the control plane HA + on-call (yes by default), and whether Option B (`MAX_CONNECTION_AGE`) should still be set as a safety net.
+4. **`wongnai/xds` vs alternatives**: is community-maintained acceptable, or do we want to fork / write our own thin server on `go-control-plane`? Affects long-term maintenance burden.
+5. **Bootstrap distribution**: who owns the ConfigMap and env-var wiring for emissary pods? Likely the same team that owns the Helm chart / deployment manifests.
+6. **Streaming RPCs**: do any current or near-future gRPC Places use long-running server-streaming or bidi RPCs? xDS handles these fine, but it's worth knowing if any Place would need special handling.
