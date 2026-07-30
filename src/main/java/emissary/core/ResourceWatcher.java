@@ -41,7 +41,7 @@ public class ResourceWatcher implements Runnable {
     protected transient Thread monitor = null;
 
     // Loop control
-    protected boolean timeToQuit = false;
+    protected volatile boolean timeToQuit = false;
 
     protected MetricRegistry metrics;
 
@@ -61,11 +61,11 @@ public class ResourceWatcher implements Runnable {
     @SuppressWarnings("ThreadPriorityCheck")
     public ResourceWatcher(final MetricsManager metricsManager) {
         this.metrics = metricsManager.getMetricRegistry();
-        final Thread thread = new Thread(this, "ResourceWatcher");
-        thread.setPriority(Thread.NORM_PRIORITY);
-        thread.setDaemon(true);
+        this.monitor = new Thread(this, "ResourceWatcher");
+        this.monitor.setPriority(Thread.NORM_PRIORITY);
+        this.monitor.setDaemon(true);
         Namespace.bind(DEFAULT_NAMESPACE_NAME, this);
-        thread.start();
+        this.monitor.start();
     }
 
 
@@ -106,9 +106,14 @@ public class ResourceWatcher implements Runnable {
     /**
      * Safely stop the monitoring Thread
      */
+    @SuppressWarnings("Interruption")
     public void quit() {
         LOG.info("Stopping resource watcher...");
         this.timeToQuit = true;
+        // Wake the monitor so it doesn't sit out the remainder of its sleep interval
+        if (this.monitor != null) {
+            this.monitor.interrupt();
+        }
     }
 
     /**

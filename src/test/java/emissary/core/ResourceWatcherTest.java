@@ -7,6 +7,7 @@ import emissary.test.core.junit5.UnitTest;
 
 import com.codahale.metrics.Timer;
 import jakarta.annotation.Nullable;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -14,9 +15,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ResourceWatcherTest extends UnitTest {
@@ -25,6 +29,21 @@ class ResourceWatcherTest extends UnitTest {
     public ResourceWatcher resourceWatcher = null;
     @Nullable
     public IServiceProviderPlace place = null;
+
+    @Override
+    @AfterEach
+    public void tearDown() throws Exception {
+        // Make sure the watcher's monitor thread is gone before the next test binds a new one into
+        // the Namespace, otherwise the departing thread unbinds its successor
+        if (this.resourceWatcher != null) {
+            this.resourceWatcher.quit();
+            if (this.resourceWatcher.monitor != null) {
+                this.resourceWatcher.monitor.join(TimeUnit.SECONDS.toMillis(5));
+            }
+            this.resourceWatcher = null;
+        }
+        super.tearDown();
+    }
 
     @Test
     void testResourceWatcherWithMultipleThreads() throws IOException, InterruptedException {
@@ -65,6 +84,22 @@ class ResourceWatcherTest extends UnitTest {
         }
 
         this.resourceWatcher.quit();
+    }
+
+    @Test
+    void testQuitStopsMonitorThread() throws InterruptedException, NamespaceException {
+        this.resourceWatcher = new ResourceWatcher();
+        assertSame(this.resourceWatcher, Namespace.lookup(ResourceWatcher.DEFAULT_NAMESPACE_NAME));
+
+        // quit() interrupts the monitor so it does not sit out the remainder of its sleep interval
+        final Thread monitor = this.resourceWatcher.monitor;
+        assertNotNull(monitor, "The monitor thread must be retained so quit() can interrupt it");
+
+        this.resourceWatcher.quit();
+
+        monitor.join(TimeUnit.SECONDS.toMillis(2));
+        assertFalse(monitor.isAlive(), "Monitor thread must terminate after quit()");
+        assertFalse(Namespace.exists(ResourceWatcher.DEFAULT_NAMESPACE_NAME), "Monitor thread must unbind itself on the way out");
     }
 
     // I was not able to get this to work by extending the current agent implementations

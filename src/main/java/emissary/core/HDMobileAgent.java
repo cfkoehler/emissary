@@ -190,7 +190,7 @@ public class HDMobileAgent extends MobileAgent {
         boolean nextKeyRecorded = true;
         boolean controlError = false;
 
-        while (currentPlace != null && newEntry != null && mypayload != null) {
+        while (currentPlace != null && newEntry != null && mypayload != null && !this.timeToQuit) {
             // One based loop counter
             loopCount++;
 
